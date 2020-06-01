@@ -111,6 +111,13 @@ public class MainGooglMapActivity extends AppCompatActivity {
                 onclickFab();
             }
         });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                onlongClickFab();
+                return true;
+            }
+        });
         mapFragment.getMapAsync(mapMarker);
 
         testText = findViewById(R.id.test_distance);
@@ -137,13 +144,16 @@ public class MainGooglMapActivity extends AppCompatActivity {
 
 
     public void onclickFab(){
-         gpsTracker = new GpsTracker(MainGooglMapActivity.this);
+        Intent intent = new Intent(getApplicationContext(), Menu_Activity.class);
+        startActivity(intent);
+    }
+
+    public void onlongClickFab(){
+        gpsTracker = new GpsTracker(MainGooglMapActivity.this);
         mlat = gpsTracker.getLatitude();
         mlng = gpsTracker.getLongitude();
 
         mapMarker.settingCamraMarakr(mlat, mlng);
-        Intent intent = new Intent(getApplicationContext(), Menu_Activity.class);
-        startActivity(intent);
     }
 
     //prmission check

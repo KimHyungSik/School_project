@@ -17,7 +17,6 @@ import java.util.ArrayList;
 public class Menu_Activity extends AppCompatActivity {
 
     Button SttBnt, Back_Map;
-    TextView SttText;
     VoiceTask voiceTask;
 
     @Override
@@ -30,7 +29,6 @@ public class Menu_Activity extends AppCompatActivity {
 
     private void SettingItems(){
         SttBnt  = findViewById(R.id.sttbutton);
-        SttText = findViewById(R.id.sttText);
         Back_Map = findViewById(R.id.back_map);
     }
 
@@ -45,7 +43,7 @@ public class Menu_Activity extends AppCompatActivity {
         Back_Map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Back_Map_Intent();
+                finishAffinity();
             }
         });
     }
@@ -99,19 +97,17 @@ public class Menu_Activity extends AppCompatActivity {
                     .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
             String str = results.get(0);
-            Paring_Text(str);
+            control(str);
         }
     }
-
-
-    private void Paring_Text(String stt){
-         if(stt.equals("지도")){
-             Back_Map_Intent();
-         }
-    }
-
     private void Back_Map_Intent(){
         Intent intent = new Intent(getApplicationContext(), MainGooglMapActivity.class);
         startActivity(intent);
+    }
+
+    private void control(String stt){
+        if(stt.contains("지도")){
+            finishAffinity();
+        }
     }
 }
