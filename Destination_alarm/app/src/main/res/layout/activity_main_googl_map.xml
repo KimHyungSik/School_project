@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginLeft="25dp"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="73dp"
         android:text="Test"
         android:textSize="25sp"
         android:textStyle="bold"
@@ -38,10 +38,19 @@
         android:clickable="true"
         app:srcCompat="@android:drawable/ic_dialog_map"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="73dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginRight="25dp"/>
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/Map_bottom_nav_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#E8EAED"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_bar"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

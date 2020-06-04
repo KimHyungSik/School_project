@@ -1,5 +1,6 @@
 package com.example.destination_alarm;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -7,16 +8,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
 public class Menu_Activity extends AppCompatActivity {
 
-    Button SttBnt, Back_Map;
+    Button SttBnt;
     VoiceTask voiceTask;
 
     @Override
@@ -25,11 +27,40 @@ public class Menu_Activity extends AppCompatActivity {
         setContentView(R.layout.activity_menu_);
         SettingItems();
         SetListener();
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.Menu_bottom_nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+
+                        // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
+                        switch (item.getItemId()) {
+
+                            case R.id.nav_map:
+                                Intent intent = new Intent(getApplicationContext(), MainGooglMapActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(0, 0);
+                                return true;
+
+                            case R.id.nav_button:
+
+                                return true;
+
+                            case R.id.nav_mic:
+
+                                return true;
+                        }
+                        return false;
+                    }
+                });
     }
+
+
 
     private void SettingItems(){
         SttBnt  = findViewById(R.id.sttbutton);
-        Back_Map = findViewById(R.id.back_map);
     }
 
     private void SetListener(){
@@ -38,12 +69,6 @@ public class Menu_Activity extends AppCompatActivity {
             public void onClick(View v) {
                 voiceTask = new VoiceTask();
                 voiceTask.execute();
-            }
-        });
-        Back_Map.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishAffinity();
             }
         });
     }
@@ -107,7 +132,7 @@ public class Menu_Activity extends AppCompatActivity {
 
     private void control(String stt){
         if(stt.contains("지도")){
-            finishAffinity();
+            Back_Map_Intent();
         }
     }
 }

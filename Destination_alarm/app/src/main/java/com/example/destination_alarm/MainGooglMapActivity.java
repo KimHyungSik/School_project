@@ -1,5 +1,6 @@
 package com.example.destination_alarm;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -19,6 +20,7 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +30,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Timer;
@@ -111,13 +114,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
                 onclickFab();
             }
         });
-        fab.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                onlongClickFab();
-                return true;
-            }
-        });
         mapFragment.getMapAsync(mapMarker);
 
         testText = findViewById(R.id.test_distance);
@@ -136,6 +132,33 @@ public class MainGooglMapActivity extends AppCompatActivity {
                         }
                     }
                 });
+        BottomNavigationView bottomNavigationView = findViewById(R.id.Map_bottom_nav_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+
+                        // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
+                        switch (item.getItemId()) {
+
+                            case R.id.nav_map:
+
+                                return true;
+
+                            case R.id.nav_button:
+
+                                return true;
+
+                            case R.id.nav_mic:
+                                Intent intent = new Intent(getApplicationContext(), Menu_Activity.class);
+                                startActivity(intent);
+                                overridePendingTransition(0, 0);
+                                return true;
+                        }
+                        return false;
+                    }
+                });
 
 
         startTimer();
@@ -144,11 +167,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
 
 
     public void onclickFab(){
-        Intent intent = new Intent(getApplicationContext(), Menu_Activity.class);
-        startActivity(intent);
-    }
-
-    public void onlongClickFab(){
         gpsTracker = new GpsTracker(MainGooglMapActivity.this);
         mlat = gpsTracker.getLatitude();
         mlng = gpsTracker.getLongitude();

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_map"
+        android:title="지도"
+        android:icon="@drawable/map_ma" />
+    <item android:id="@+id/nav_button"
+        android:title="버튼"
+        android:icon="@drawable/button" />
+    <item android:id="@+id/nav_mic"
+        android:title="마이크"
+        android:icon="@drawable/mic" />
+</menu>
