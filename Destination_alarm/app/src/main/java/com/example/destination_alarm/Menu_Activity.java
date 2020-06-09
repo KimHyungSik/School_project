@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -29,35 +31,36 @@ public class Menu_Activity extends AppCompatActivity {
         SetListener();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.Menu_bottom_nav_view);
+        bottomNavigationView.setItemIconTintList(null);
+        bottomNavigationView.setItemTextColor(ColorStateList.valueOf(Color.GRAY));
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-
-                        // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
-                        switch (item.getItemId()) {
-
-                            case R.id.nav_map:
-                                Intent intent = new Intent(getApplicationContext(), MainGooglMapActivity.class);
-                                startActivity(intent);
-                                overridePendingTransition(0, 0);
-                                return true;
-
-                            case R.id.nav_button:
-
-                                return true;
-
-                            case R.id.nav_mic:
-
-                                return true;
-                        }
-                        return false;
+                    // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
+                    switch (item.getItemId()) {
+                        case R.id.nav_map:
+                            Intent intent = new Intent(getApplicationContext(), MainGooglMapActivity.class);
+                            startActivity(intent);
+                            overridePendingTransition(0, 0);
+                            return true;
+                        case R.id.nav_button:
+                            Intent button_intent = new Intent(getApplicationContext(), Button_room.class);
+                            startActivity(button_intent);
+                            overridePendingTransition(0, 0);
+                            return true;
+                        case R.id.nav_mic:
+                            return true;
                     }
-                });
+                    return false;
+                }
+            });
     }
 
-
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+    }
 
     private void SettingItems(){
         SttBnt  = findViewById(R.id.sttbutton);

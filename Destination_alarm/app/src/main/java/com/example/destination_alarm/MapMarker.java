@@ -1,7 +1,6 @@
 package com.example.destination_alarm;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,11 +11,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapMarker extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapMarker extends AppCompatActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private Marker marakr = null, ClickMarker = null, LongClickMarker = null;
     private CameraUpdate cameraUpdate;
@@ -28,7 +26,7 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback, 
 
     public static final  String Ip = "192.168.0.2"; //아이피 호
     public static final int Port = 8800; //폰트 번호
-    MarkerData chk_data = new MarkerData();
+    Socket_data chk_data = new Socket_data();
     Socket_ socket_;
 
 
@@ -45,8 +43,6 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback, 
         marakr = mMap.addMarker(markerOptions);
         cameraUpdate = CameraUpdateFactory.newLatLngZoom(Defaultposition, 10);
         mMap.moveCamera(cameraUpdate);
-
-        mMap.setOnMarkerClickListener(this);
 
         if(saveLatLng != null){
             OnMapLongClickListener(saveLatLng, PreferenceManager.getInt(context, "Marker_chk"));
@@ -161,22 +157,4 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback, 
         PreferenceManager.setInt(context, "Marker_chk", chk_data.getOnOff());
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        if(marker.equals(LongClickMarker)) {
-            if(chk_data.getOnOff() == 1){
-                chk_data.setOnOff(0);
-                ChangeLongMarkerColor(chk_data.getOnOff());
-            }
-            else if(chk_data.getOnOff() == 0){
-                chk_data.setOnOff(1);
-                ChangeLongMarkerColor(chk_data.getOnOff());
-            }
-
-            socket_ = new Socket_(Ip, Port, chk_data.getOnOff());
-            socket_.start();
-            Log.d("Tag", "ok");
-        }
-        return false;
-    }
 }

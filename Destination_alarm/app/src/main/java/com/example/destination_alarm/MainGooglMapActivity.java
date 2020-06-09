@@ -14,6 +14,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.RingtoneManager;
@@ -41,14 +43,14 @@ public class MainGooglMapActivity extends AppCompatActivity {
     private TextView testText;
     private String testTextString, SaveLat = null, SaveLng = null;
 
-    public static final  String MainIp = "192.168.0.2"; //아이피 호
-    public static final int MainPort = 8800; //폰트 번호
+    public static final  String MainIp = "192.168.0.5"; //아이피 호
+    public static final int MainPort = 9999; //폰트 번호
 
     private double mlat, mlng, lat, lng;
     private FloatingActionButton fab;
 
     private GpsTracker gpsTracker;
-    private MarkerData chk = new MarkerData();
+    private Socket_data chk = new Socket_data();
     private Socket_ socket_;
 
     private LatLng myPosition, touchPosition, clickPosition;
@@ -87,7 +89,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
         createNotificationChannel();
         SaveLat = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lat");
         SaveLng = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lng");
-        //저장된 롱 클릭 마커 확인
+        //        //저장된 롱 클릭 마커 확인
         if(SaveLng!=null&&SaveLat!=null){
             LongClick_latLng = new LatLng(Double.parseDouble(SaveLat),Double.parseDouble(SaveLng));
             mapMarker = new MapMarker(context, LongClick_latLng);
@@ -133,38 +135,36 @@ public class MainGooglMapActivity extends AppCompatActivity {
                     }
                 });
         BottomNavigationView bottomNavigationView = findViewById(R.id.Map_bottom_nav_view);
+        bottomNavigationView.setItemIconTintList(null);
+        bottomNavigationView.setItemTextColor(ColorStateList.valueOf(Color.GRAY));
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-
-                        // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
-                        switch (item.getItemId()) {
-
-                            case R.id.nav_map:
-
-                                return true;
-
-                            case R.id.nav_button:
-
-                                return true;
-
-                            case R.id.nav_mic:
-                                Intent intent = new Intent(getApplicationContext(), Menu_Activity.class);
-                                startActivity(intent);
-                                overridePendingTransition(0, 0);
-                                return true;
-                        }
-                        return false;
+                    // 어떤 메뉴 아이템이 터치되었는지 확인합니다.
+                    switch (item.getItemId()) {
+                        case R.id.nav_map:
+                            return true;
+                        case R.id.nav_button:
+                            Intent button_intent = new Intent(getApplicationContext(), Button_room.class);
+                            startActivity(button_intent);
+                            overridePendingTransition(0, 0);
+                            return true;
+                        case R.id.nav_mic:
+                            Intent mic_intent = new Intent(getApplicationContext(), Menu_Activity.class);
+                            startActivity(mic_intent);
+                            overridePendingTransition(0, 0);
+                            return true;
                     }
-                });
-
-
+                    return false;
+                }
+            });
         startTimer();
-
     }
-
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+    }
 
     public void onclickFab(){
         gpsTracker = new GpsTracker(MainGooglMapActivity.this);
@@ -268,7 +268,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
             if(Idistance <=40 && notification_check == false){
                     if(chk.getOnOff() == 0){
                         chk.setOnOff(1);
-                        socket_ = new Socket_(MainIp, MainPort, chk.getOnOff());
+                        socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
                         socket_.start();
                         mapMarker.ChangeLongMarkerColor(chk.getOnOff());
                     }
@@ -278,7 +278,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
             if(Idistance >= 50 && notification_check == true){
                 if(chk.getOnOff() == 1){
                     chk.setOnOff(0);
-                    socket_ = new Socket_(MainIp, MainPort, chk.getOnOff());
+                    socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
                     socket_.start();
                     mapMarker.ChangeLongMarkerColor(chk.getOnOff());
                 }

@@ -15,8 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Menu_Activity"/>
-
+        <activity android:name=".Button_room"/>
+        <activity android:name=".Menu_Activity" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAbKliDbqwMvPj0O--nMYZOZ5wdmJsaAKs" />
