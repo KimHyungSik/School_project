@@ -43,7 +43,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
     private TextView testText;
     private String testTextString, SaveLat = null, SaveLng = null;
 
-    public static final  String MainIp = "192.168.0.9"; //아이피 호
+    public static final  String MainIp = "192.168.0.16"; //아이피 호
     public static final int MainPort = 9999; //폰트 번호
 
     private double mlat, mlng, lat, lng;
