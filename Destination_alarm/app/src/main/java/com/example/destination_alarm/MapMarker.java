@@ -1,7 +1,6 @@
 package com.example.destination_alarm;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -85,8 +84,6 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback{
         }
 
         saveLongClikcPosition(LongClickposition);
-        Log.d("Map", LongClickposition.toString());
-        Log.d("Map", LongClickposition.toString());
         LongClickMarker = mMap.addMarker(LongClickOptions);
     }
 

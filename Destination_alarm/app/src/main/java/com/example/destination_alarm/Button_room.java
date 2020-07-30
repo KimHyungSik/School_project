@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -67,9 +66,7 @@ public class Button_room extends AppCompatActivity {
                         return false;
                     }
                 });
-        boolean checked = Priority == 1 ? true : false;
-        Log.d("button","checked : " + Boolean.toString(checked));
-        Log.d("btuuon","Priority : " +Integer.toString(Priority));
+        boolean checked = Priority == 1;
         Map_Button_Switch.setChecked(checked);
         if(checked){
             Map_Text.setTextColor(Color.parseColor("#283142"));
@@ -106,14 +103,12 @@ public class Button_room extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(S_data.getOnOff() == 0){
-                    Log.d("buttom","bubl_1 on");
                     S_data.setOnOff(1);
                     socket_ = new Socket_(MainIp, MainPort, S_data.getOnOff_data());
                     socket_.start();
                     bulb_1.setBackgroundColor(Color.YELLOW);
                 }
                 else if(S_data.getOnOff() == 1){
-                    Log.d("buttom","bubl_1 off");
                     S_data.setOnOff(0);
                     socket_ = new Socket_(MainIp, MainPort, S_data.getOnOff_data());
                     socket_.start();
@@ -125,14 +120,12 @@ public class Button_room extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(S_data.getOnOff2() == 0){
-                    Log.d("buttom","bubl_2 on");
                     S_data.setOnOff2(1);
                     socket_ = new Socket_(MainIp, MainPort, S_data.getOnOff2_data());
                     socket_.start();
                     bulb_2.setBackgroundColor(Color.YELLOW);
                 }
                 else if(S_data.getOnOff2() == 1){
-                    Log.d("buttom","bubl_2 off");
                     S_data.setOnOff2(0);
                     socket_ = new Socket_(MainIp, MainPort, S_data.getOnOff2_data());
                     socket_.start();

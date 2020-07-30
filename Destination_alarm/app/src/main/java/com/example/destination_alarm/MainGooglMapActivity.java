@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +21,6 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -40,36 +38,24 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainGooglMapActivity extends AppCompatActivity {
+    private static final String CHANNEL_ID = "Destination_channel";
     //거리계산 테스트용
     private TextView testText;
-    private String testTextString, SaveLat = null, SaveLng = null;
     private IP_Port ip_port = new IP_Port();
 
     public final  String MainIp = ip_port.getIp(); //아이피 호
     public final int MainPort = ip_port.getPort(); //폰트 번호
 
     private double mlat, mlng, lat, lng;
-    private FloatingActionButton fab;
 
     private GpsTracker gpsTracker;
     private Socket_data chk = new Socket_data();
-    private Socket_ socket_;
-
-    private LatLng myPosition, touchPosition, clickPosition;
-    private Context context;
-
-    //거리체크 변수
-    private double Ddistance;
-    private int Idistance;
 
     //알림 1번만보내기 체크
     private boolean notification_check = false;
 
     //런너블 타이머
     Timer timer;
-
-    //Last position
-    private FusedLocationProviderClient fusedLocationProviderClient;
 
 
     private MapMarker mapMarker;
@@ -78,7 +64,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
     //각종상수들
     private static final int GPS_ENABLE_REQUEST_CODE = 2000;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private static final String CHANNEL_ID = "Destination_channel";
+
     //저장된 롱 클릭 좌표 저장
     public LatLng LongClick_latLng;
     int Priority_MapOrButton = 0;
@@ -90,15 +76,16 @@ public class MainGooglMapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_googl_map);
-        context = this;
+        Context context = this;
         createNotificationChannel();
-        SaveLat = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lat");
-        SaveLng = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lng");
+        String saveLat = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lat");
+        String saveLng = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lng");
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        //Last position
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         //저장된 롱 클릭 마커 확인
-        if(SaveLng!=null&&SaveLat!=null){
-            LongClick_latLng = new LatLng(Double.parseDouble(SaveLat),Double.parseDouble(SaveLng));
+        if(saveLng !=null&& saveLat !=null){
+            LongClick_latLng = new LatLng(Double.parseDouble(saveLat),Double.parseDouble(saveLng));
             mapMarker = new MapMarker(context, LongClick_latLng);
         }else{
         mapMarker = new MapMarker(context);
@@ -123,7 +110,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
         }
 
         //fab 사용 함수
-        fab = findViewById(R.id.find_location_me);
+        FloatingActionButton fab = findViewById(R.id.find_location_me);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -139,7 +126,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
 
         if(save_Priority_MapOrButton != -1){
             Priority_MapOrButton = save_Priority_MapOrButton;
-            Log.d("Tag","first priority : "+Integer.toString(Priority_MapOrButton));
         }
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.Map_bottom_nav_view);
@@ -174,7 +160,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
             chk.setOnOff(extras.getInt("SocketData"));
             notification_check = chk.getOnOff() == 1;
             Priority_MapOrButton = extras.getInt("Priority");
-            Log.d("Tag","priority extra : "+Integer.toString(Priority_MapOrButton));
         }
 
         startTimer();
@@ -271,15 +256,16 @@ public class MainGooglMapActivity extends AppCompatActivity {
 
             mapMarker.settingNonCamerMarakr(mlat, mlng);
 
-            myPosition = mapMarker.getMarkerLatLng();
-            clickPosition = mapMarker.getClickMarkerLatLng();
-            touchPosition = mapMarker.getLongClickhMarkerLatLng();
+            LatLng myPosition = mapMarker.getMarkerLatLng();
+            LatLng clickPosition = mapMarker.getClickMarkerLatLng();
+            LatLng touchPosition = mapMarker.getLongClickhMarkerLatLng();
             if(touchPosition != null && clickPosition != null){
-                Ddistance = check_distance.getDistance(clickPosition, touchPosition);
+                //거리체크 변수
+                double ddistance = check_distance.getDistance(clickPosition, touchPosition);
 
-                Idistance = (int)Math.round(Ddistance);
+                int idistance = (int) Math.round(ddistance);
 
-                testTextString = Double.toString(Idistance);
+                String testTextString = Double.toString(idistance);
                 testText.setText(testTextString);
                 if(Priority_MapOrButton == 1) {
                     if (chk.getOnOff() == 1) {
@@ -288,48 +274,52 @@ public class MainGooglMapActivity extends AppCompatActivity {
                         mapMarker.ChangeLongMarkerColor(chk.getOnOff());
                     }
                 }else {
-                    if (Idistance <= 40 && !notification_check) {
+                    Socket_ socket_;
+                    if (idistance <= 40) {
                         if (chk.getOnOff() == 0) {
                             chk.setOnOff(1);
                             socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
                             socket_.start();
                         }
                         mapMarker.ChangeLongMarkerColor(chk.getOnOff());
-                        sendNotification();
-                        notification_check = true;
+                        if(!notification_check){
+                            notification_check = true;
+                            sendNotification("목적지 도착", "콘센트가 켜집니다.");
+                        }
                     }
-                    if (Idistance >= 50 && notification_check) {
-                        Log.d("getOnoff", ">50, map : "+ Integer.toString(chk.getOnOff()));
+                    if (idistance >= 50) {
                         if (chk.getOnOff() == 1) {
                             chk.setOnOff(0);
                             socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
                             socket_.start();
                         }
                         mapMarker.ChangeLongMarkerColor(chk.getOnOff());
-                        notification_check = false;
+                        if(notification_check){
+                            notification_check = false;
+                        }
                     }
                 }
             }
         }
     };
-    //Creat Notification channel
-    private void createNotificationChannel() {
+
+    public void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Destination_Cahnnel";
             String description = "channel_description";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
+            int importance = android.app.NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            android.app.NotificationManager notificationManager = getSystemService(android.app.NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
     //sned Notification
-    private void sendNotification(){
+    public void sendNotification(String mainTitle, String content){
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         Intent push;
         PendingIntent fullScreenPendingIntent;
@@ -339,8 +329,8 @@ public class MainGooglMapActivity extends AppCompatActivity {
         fullScreenPendingIntent = PendingIntent.getActivity(this, 0, push, PendingIntent.FLAG_CANCEL_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("성공")
-                .setContentText("알람 보내기 성공")
+                .setContentTitle(mainTitle)
+                .setContentText(content)
                 .setAutoCancel(true)
                 .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
@@ -352,7 +342,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
         notificationManager.notify(0, builder.build());
         vibrator.vibrate(1500);
     }
-
 }
 
 
