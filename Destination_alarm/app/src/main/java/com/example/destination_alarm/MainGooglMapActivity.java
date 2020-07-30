@@ -22,6 +22,7 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -42,9 +43,10 @@ public class MainGooglMapActivity extends AppCompatActivity {
     //거리계산 테스트용
     private TextView testText;
     private String testTextString, SaveLat = null, SaveLng = null;
+    private IP_Port ip_port = new IP_Port();
 
-    public static final  String MainIp = "192.168.0.9"; //아이피 호
-    public static final int MainPort = 9999; //폰트 번호
+    public final  String MainIp = ip_port.getIp(); //아이피 호
+    public final int MainPort = ip_port.getPort(); //폰트 번호
 
     private double mlat, mlng, lat, lng;
     private FloatingActionButton fab;
@@ -66,7 +68,9 @@ public class MainGooglMapActivity extends AppCompatActivity {
     //런너블 타이머
     Timer timer;
 
-    private FusedLocationProviderClient fusedLocationClient;
+    //Last position
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
 
     private MapMarker mapMarker;
 
@@ -77,6 +81,7 @@ public class MainGooglMapActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "Destination_channel";
     //저장된 롱 클릭 좌표 저장
     public LatLng LongClick_latLng;
+    int Priority_MapOrButton = 0;
 
     //체크해야할 퍼미션들
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION};
@@ -89,20 +94,29 @@ public class MainGooglMapActivity extends AppCompatActivity {
         createNotificationChannel();
         SaveLat = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lat");
         SaveLng = PreferenceManager.getString(context, "Save_Long_Clikc_Position_Lng");
-        //        //저장된 롱 클릭 마커 확인
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        //저장된 롱 클릭 마커 확인
         if(SaveLng!=null&&SaveLat!=null){
             LongClick_latLng = new LatLng(Double.parseDouble(SaveLat),Double.parseDouble(SaveLng));
             mapMarker = new MapMarker(context, LongClick_latLng);
         }else{
-        mapMarker = new MapMarker(context);}
-
+        mapMarker = new MapMarker(context);
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().
                 findFragmentById(R.id.map);
 
-        //Last knows location
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            mapMarker.settingCamraMarakr(location.getLatitude(),location.getLongitude());
+                        }
+                    }
+                });
         //Check Permission
         if (checkLocationServicesStatus()) {
             checkRunTimePermission();
@@ -119,21 +133,15 @@ public class MainGooglMapActivity extends AppCompatActivity {
         mapFragment.getMapAsync(mapMarker);
 
         testText = findViewById(R.id.test_distance);
-        //Last knowLocation 위치 설정
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null){
 
-                            mlat = location.getLatitude();
-                            mlng = location.getLongitude();
+        //우선순위
+        int save_Priority_MapOrButton = PreferenceManager.getInt(MainGooglMapActivity.this,"Priority_MapOrButton");
 
-                            mapMarker.settingCamraMarakr(mlat, mlng);
-                        }
-                    }
-                });
+        if(save_Priority_MapOrButton != -1){
+            Priority_MapOrButton = save_Priority_MapOrButton;
+            Log.d("Tag","first priority : "+Integer.toString(Priority_MapOrButton));
+        }
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.Map_bottom_nav_view);
         bottomNavigationView.setItemIconTintList(null);
         bottomNavigationView.setItemTextColor(ColorStateList.valueOf(Color.GRAY));
@@ -147,6 +155,8 @@ public class MainGooglMapActivity extends AppCompatActivity {
                             return true;
                         case R.id.nav_button:
                             Intent button_intent = new Intent(getApplicationContext(), Button_room.class);
+                            button_intent.putExtra("SocketData", chk.getOnOff());
+                            button_intent.putExtra("Priority", Priority_MapOrButton);
                             startActivity(button_intent);
                             overridePendingTransition(0, 0);
                             return true;
@@ -159,8 +169,17 @@ public class MainGooglMapActivity extends AppCompatActivity {
                     return false;
                 }
             });
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            chk.setOnOff(extras.getInt("SocketData"));
+            notification_check = chk.getOnOff() == 1;
+            Priority_MapOrButton = extras.getInt("Priority");
+            Log.d("Tag","priority extra : "+Integer.toString(Priority_MapOrButton));
+        }
+
         startTimer();
     }
+
     @Override
     public void onBackPressed() {
         finishAffinity();
@@ -170,7 +189,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
         gpsTracker = new GpsTracker(MainGooglMapActivity.this);
         mlat = gpsTracker.getLatitude();
         mlng = gpsTracker.getLongitude();
-
         mapMarker.settingCamraMarakr(mlat, mlng);
     }
 
@@ -256,33 +274,40 @@ public class MainGooglMapActivity extends AppCompatActivity {
             myPosition = mapMarker.getMarkerLatLng();
             clickPosition = mapMarker.getClickMarkerLatLng();
             touchPosition = mapMarker.getLongClickhMarkerLatLng();
-
             if(touchPosition != null && clickPosition != null){
-            Ddistance = check_distance.getDistance(clickPosition, touchPosition);
+                Ddistance = check_distance.getDistance(clickPosition, touchPosition);
 
-            Idistance = (int)Math.round(Ddistance);
+                Idistance = (int)Math.round(Ddistance);
 
-            testTextString = Double.toString(Idistance);
-            testText.setText(testTextString);
-
-            if(Idistance <=40 && notification_check == false){
-                    if(chk.getOnOff() == 0){
-                        chk.setOnOff(1);
-                        socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
-                        socket_.start();
+                testTextString = Double.toString(Idistance);
+                testText.setText(testTextString);
+                if(Priority_MapOrButton == 1) {
+                    if (chk.getOnOff() == 1) {
+                        mapMarker.ChangeLongMarkerColor(chk.getOnOff());
+                    } else {
                         mapMarker.ChangeLongMarkerColor(chk.getOnOff());
                     }
-                    sendNotification();
-                    notification_check = true;
-                }
-            if(Idistance >= 50 && notification_check == true){
-                if(chk.getOnOff() == 1){
-                    chk.setOnOff(0);
-                    socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
-                    socket_.start();
-                    mapMarker.ChangeLongMarkerColor(chk.getOnOff());
-                }
-                notification_check = false;
+                }else {
+                    if (Idistance <= 40 && !notification_check) {
+                        if (chk.getOnOff() == 0) {
+                            chk.setOnOff(1);
+                            socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
+                            socket_.start();
+                        }
+                        mapMarker.ChangeLongMarkerColor(chk.getOnOff());
+                        sendNotification();
+                        notification_check = true;
+                    }
+                    if (Idistance >= 50 && notification_check) {
+                        Log.d("getOnoff", ">50, map : "+ Integer.toString(chk.getOnOff()));
+                        if (chk.getOnOff() == 1) {
+                            chk.setOnOff(0);
+                            socket_ = new Socket_(MainIp, MainPort, chk.getOnOff_data());
+                            socket_.start();
+                        }
+                        mapMarker.ChangeLongMarkerColor(chk.getOnOff());
+                        notification_check = false;
+                    }
                 }
             }
         }
@@ -327,8 +352,6 @@ public class MainGooglMapActivity extends AppCompatActivity {
         notificationManager.notify(0, builder.build());
         vibrator.vibrate(1500);
     }
-
-
 
 }
 

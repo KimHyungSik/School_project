@@ -12,6 +12,7 @@ public class Socket_ extends Thread {
     int port;
     String data;
 
+
     private DataOutputStream dos;
     private Socket socket;
 
@@ -27,7 +28,6 @@ public class Socket_ extends Thread {
 
             dos = new DataOutputStream(socket.getOutputStream());
 
-            Log.d("ss","그래 이건 된다");
             dos.writeUTF(data);
             dos.flush();
 

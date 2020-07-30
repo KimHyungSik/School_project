@@ -22,10 +22,6 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback{
     private MarkerOptions markerOptions = new MarkerOptions();
     private MarkerOptions ClickarkerOptions = new MarkerOptions(), LongClickOptions = new MarkerOptions();
     private Context context;
-
-
-    public static final  String Ip = "192.168.0.2"; //아이피 호
-    public static final int Port = 8800; //폰트 번호
     Socket_data chk_data = new Socket_data();
     Socket_ socket_;
 
@@ -89,19 +85,13 @@ public class MapMarker extends AppCompatActivity implements OnMapReadyCallback{
         }
 
         saveLongClikcPosition(LongClickposition);
-
+        Log.d("Map", LongClickposition.toString());
+        Log.d("Map", LongClickposition.toString());
         LongClickMarker = mMap.addMarker(LongClickOptions);
     }
 
     public void ChangeLongMarkerColor(int color){
-        if(color == 0) {
-            LongClickOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        }
-        if(color == 1){
-            LongClickOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-        }
-
-        LongClickMarker = mMap.addMarker(LongClickOptions);
+           OnMapLongClickListener(LongClickposition, color);
     }
 
 
